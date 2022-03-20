@@ -36,5 +36,5 @@ bilibili_cookie=xxx
 ### 示例
 
 <div align="left">
-  <img src="[./examples/1.png](https://s2.loli.net/2022/03/20/Nk3jZJgxforHDsu.png)" width="400" />
+  <img src="https://s2.loli.net/2022/03/20/Nk3jZJgxforHDsu.png" width="400" />
 </div>
