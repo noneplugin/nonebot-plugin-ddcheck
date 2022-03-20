@@ -94,7 +94,7 @@ async def get_uid_by_name(name: str) -> int:
             if user["uname"] == name:
                 return user["mid"]
         return 0
-    except (IndexError, httpx.TimeoutException) as e:
+    except (KeyError, IndexError, httpx.TimeoutException) as e:
         logger.warning(f"Error in get_uid_by_name({name}): {e}")
         return 0
 
@@ -107,7 +107,7 @@ async def get_user_info(uid: int) -> dict:
             resp = await client.get(url, params=params, timeout=10)
             result = resp.json()
         return result["card"]
-    except (IndexError, httpx.TimeoutException) as e:
+    except (KeyError, IndexError, httpx.TimeoutException) as e:
         logger.warning(f"Error in get_user_info({uid}): {e}")
         return {}
 
@@ -121,7 +121,7 @@ async def get_medals(uid: int) -> List[dict]:
             resp = await client.get(url, params=params, headers=headers)
             result = resp.json()
         return result["data"]["list"]
-    except (IndexError, httpx.TimeoutException) as e:
+    except (KeyError, IndexError, httpx.TimeoutException) as e:
         logger.warning(f"Error in get_medals({uid}): {e}")
         return []
 
