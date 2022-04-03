@@ -170,13 +170,14 @@ async def get_reply(name: str) -> Union[str, bytes]:
 
     follows_num = int(user_info["attention"])
     vtbs_num = len(vtbs)
+    percent = vtbs_num / follows_num * 100 if follows_num else 0
     result = {
         "name": user_info["name"],
         "uid": user_info["mid"],
         "face": user_info["face"],
         "fans": user_info["fans"],
         "follows": user_info["attention"],
-        "percent": f"{(vtbs_num/follows_num*100):.2f}% ({vtbs_num}/{follows_num})",
+        "percent": f"{percent:.2f}% ({vtbs_num}/{follows_num})",
         "vtbs": vtbs,
     }
     template = env.get_template("info.html")
