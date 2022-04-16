@@ -1,6 +1,7 @@
-# nonebot-plugin-ddcheck
+# zhenxun-nonebot-plugin-ddcheck
 
 NoneBot2 成分姬插件
+目前已经修改为真寻版本
 
 查询B站关注列表的VTuber成分，并以图片形式发出
 
@@ -18,23 +19,17 @@ VTB列表数据来源：[vtbs.moe](https://vtbs.moe/)
 
 ### 安装
 
-- 使用 nb-cli
+- 首先
 
 ```
-nb plugin install nonebot_plugin_ddcheck
+pip install html2image
 ```
 
-- 使用 pip
+- 然后
 
-```
-pip install nonebot_plugin_ddcheck
-```
+将 zhenxun_plugin_ddcheck 拖入 真寻目录下的 plugin 文件夹
 
-若要显示主播牌子，需要在 `.env.xxx` 文件中添加任意的B站用户cookie：
-
-```
-bilibili_cookie=xxx
-```
+若要显示主播牌子，需要在 `config.py` 文件中添加任意的B站用户cookie：
 
 
 ### 示例
