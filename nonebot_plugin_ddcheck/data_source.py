@@ -1,12 +1,14 @@
 import json
+from time import sleep
 import httpx
 import jinja2
 from pathlib import Path
 from typing import List, Union
-from nonebot import get_driver
+from nonebot import get_driver,load_plugin
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
-from nonebot_plugin_htmlrender import html_to_pic
+from utils.message_builder import image
+from html2image import Html2Image
 
 
 from .config import Config
@@ -26,7 +28,6 @@ env = jinja2.Environment(
 async def update_vtb_list():
     vtb_list = load_vtb_list()
     urls = [
-        "https://api.vtbs.moe/v1/short",
         "https://api.tokyo.vtbs.moe/v1/short",
         "https://vtbs.musedash.moe/v1/short",
     ]
@@ -163,10 +164,13 @@ async def get_reply(name: str) -> Union[str, bytes]:
     medal_dict = {medal["target_name"]: medal for medal in medals}
 
     vtb_dict = {info["mid"]: info for info in vtb_list}
+    #vtb_dict =dict_slice(vtb_dict, 1, 2000)
     vtbs = [
         info for uid, info in vtb_dict.items() if uid in user_info.get("attentions", [])
     ]
     vtbs = [format_vtb_info(info, medal_dict) for info in vtbs]
+
+    
 
     follows_num = int(user_info["attention"])
     vtbs_num = len(vtbs)
@@ -180,6 +184,15 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "percent": f"{percent:.2f}% ({vtbs_num}/{follows_num})",
         "vtbs": vtbs,
     }
-    template = env.get_template("info.html")
-    content = await template.render_async(info=result)
-    return await html_to_pic(content, wait=0, viewport={"width": 100, "height": 100})
+    if len(vtbs) < 500:
+        template = env.get_template("info.html")
+        content = await template.render_async(info=result)
+    
+        hti = Html2Image()
+        hti.size = (570,220+len(vtbs)*62.5)
+        hti.screenshot(html_str=content, save_as='ccf.jpg')
+        return image('ccf.jpg', "../../")
+    else:
+        return f"这个人是个DD头子\n{percent:.2f}% ({vtbs_num}/{follows_num})"
+
+
