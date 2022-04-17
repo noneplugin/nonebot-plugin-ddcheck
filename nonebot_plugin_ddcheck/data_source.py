@@ -13,6 +13,8 @@ from html2image import Html2Image
 
 from .config import Config
 
+proxies = { "http://": None, "https://": None}
+
 dd_config = Config.parse_obj(get_driver().config.dict())
 
 data_path = Path("data/ddcheck")
@@ -31,7 +33,7 @@ async def update_vtb_list():
         "https://api.tokyo.vtbs.moe/v1/short",
         "https://vtbs.musedash.moe/v1/short",
     ]
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(proxies=proxies) as client:
         for url in urls:
             try:
                 resp = await client.get(url, timeout=10)
@@ -88,7 +90,7 @@ async def get_uid_by_name(name: str) -> int:
     try:
         url = "http://api.bilibili.com/x/web-interface/search/type"
         params = {"search_type": "bili_user", "keyword": name}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(proxies=proxies) as client:
             resp = await client.get(url, params=params, timeout=10)
             result = resp.json()
         for user in result["data"]["result"]:
@@ -104,7 +106,7 @@ async def get_user_info(uid: int) -> dict:
     try:
         url = "https://account.bilibili.com/api/member/getCardByMid"
         params = {"mid": uid}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(proxies=proxies) as client:
             resp = await client.get(url, params=params, timeout=10)
             result = resp.json()
         return result["card"]
@@ -118,7 +120,7 @@ async def get_medals(uid: int) -> List[dict]:
         url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
         params = {"target_id": uid}
         headers = {"cookie": dd_config.bilibili_cookie}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(proxies=proxies) as client:
             resp = await client.get(url, params=params, headers=headers)
             result = resp.json()
         return result["data"]["list"]
@@ -164,7 +166,7 @@ async def get_reply(name: str) -> Union[str, bytes]:
     medal_dict = {medal["target_name"]: medal for medal in medals}
 
     vtb_dict = {info["mid"]: info for info in vtb_list}
-    #vtb_dict =dict_slice(vtb_dict, 1, 2000)
+    
     vtbs = [
         info for uid, info in vtb_dict.items() if uid in user_info.get("attentions", [])
     ]
