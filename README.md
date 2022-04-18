@@ -10,7 +10,6 @@ VTB列表数据来源：[vtbs.moe](https://vtbs.moe/)
 
 ### 使用方式
 
-**以下命令需要加[命令前缀](https://v2.nonebot.dev/docs/api/config#Config-command_start) 
 
 ```
 查成分 + B站用户名/UID
