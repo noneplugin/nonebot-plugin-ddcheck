@@ -191,7 +191,7 @@ async def get_reply(name: str) -> Union[str, bytes]:
         content = await template.render_async(info=result)
     
         hti = Html2Image()
-        hti.size = (570,220+len(vtbs)*62.5)
+        hti.size = (570,280+len(vtbs)*63)
         hti.screenshot(html_str=content, save_as='ccf.jpg')
         return image('ccf.jpg', "../../")
     else:
