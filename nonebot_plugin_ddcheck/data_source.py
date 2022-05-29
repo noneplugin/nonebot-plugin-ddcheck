@@ -30,6 +30,7 @@ env = jinja2.Environment(
 async def update_vtb_list():
     vtb_list = load_vtb_list()
     urls = [
+        "https://api.vtbs.moe/v1/short",
         "https://api.tokyo.vtbs.moe/v1/short",
         "https://vtbs.musedash.moe/v1/short",
     ]
@@ -186,15 +187,14 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "percent": f"{percent:.2f}% ({vtbs_num}/{follows_num})",
         "vtbs": vtbs,
     }
-    if len(vtbs) < 500:
-        template = env.get_template("info.html")
-        content = await template.render_async(info=result)
-    
-        hti = Html2Image()
-        hti.size = (570,280+len(vtbs)*63)
-        hti.screenshot(html_str=content, save_as='ccf.jpg')
-        return image('ccf.jpg', "../../")
-    else:
-        return f"这个人是个DD头子\n{percent:.2f}% ({vtbs_num}/{follows_num})"
+    template = env.get_template("info.html")
+    hti = Html2Image()
+    content = await template.render_async(info=result)
+
+    lie = (len(vtbs)//100) + (0 if len(vtbs)%100 == 0 else 1)
+    hti.size = (lie*570,(280+len(vtbs)*63) if len (vtbs)<101 else 6650)
+    hti.screenshot(html_str=content, save_as='ccf.jpg')
+    return image('ccf.jpg', "../../")
+
 
 

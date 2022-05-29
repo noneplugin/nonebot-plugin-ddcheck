@@ -70,14 +70,18 @@
         margin-top: 5px;
         font-weight: bold;
       }
-      .list{
+      .list {
         margin-top: 10px;
         margin-right: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: top;
       }
       table {
         border-collapse: collapse;
         border-spacing: 0;
         width: 100%;
+        height: min-content;
         border: 1px solid #ddd;
       }
       th,
@@ -89,10 +93,12 @@
         align-items: center;
         white-space: nowrap;
       }
+      td {
+        height: 22px;
+      }
       tr:nth-child(even) {
         background-color: #f5f5f5;
       }
-      
       .up-uid {
         font-size: x-small;
         background-color: #dddddd;
@@ -155,8 +161,9 @@
         </div>
       </div>
       <div class="list">
+        {% for i in range(0, (info['vtbs'] | length), 100) %}
         <table>
-          {% for vtb in info['vtbs'] %}
+          {% for vtb in info['vtbs'][i: i + 100] %}
           <tr>
             <td>
               <div class="up-name">{{ vtb['name'] }}</div>
@@ -176,6 +183,7 @@
           </tr>
           {% endfor %}
         </table>
+        {% endfor %}
       </div>
     </div>
   </body>
