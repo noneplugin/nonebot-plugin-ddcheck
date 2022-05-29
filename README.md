@@ -36,3 +36,10 @@ pip install html2image
 <div align="left">
   <img src="https://s2.loli.net/2022/03/20/Nk3jZJgxforHDsu.png" width="400" />
 </div>
+
+
+### 更新日志
+
+**2022/5/30**
+
+1. 修复了超过100位vtb关注时无法全部显示
