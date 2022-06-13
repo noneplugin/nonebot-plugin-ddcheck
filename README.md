@@ -8,12 +8,18 @@ VTB列表数据来源：[vtbs.moe](https://vtbs.moe/)
 
 
 ### 分支说明
+
 此分支 使用了 ```playwright``` 
+
 我本人测试py3.9、3.8都可以使用
+
 但是另外一个小伙伴死活用不了 就独立出一个分支了
+
 该分支的图片大小会更友善（更少的白边）
 
 那个分支需要计算宽高
+另外一个解决办法[html2image]([https://vtbs.moe/](https://github.com/po-lan/zhenxun-nonebot-plugin-ddcheck/tree/html2image))
+
 
 ### 使用方式
 
