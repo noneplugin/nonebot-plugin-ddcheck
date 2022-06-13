@@ -1,19 +1,15 @@
 import json
-from time import sleep
 import httpx
 import jinja2
 from pathlib import Path
 from typing import List, Union
-from nonebot import get_driver,load_plugin
+from nonebot import get_driver
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
-from utils.message_builder import image
-from html2image import Html2Image
+from .HTP2 import html_to_pic
 
 
 from .config import Config
-
-proxies = { "http://": None, "https://": None}
 
 dd_config = Config.parse_obj(get_driver().config.dict())
 
@@ -26,9 +22,9 @@ env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_path), enable_async=True
 )
 
-
+proxies = { "http://": None, "https://": None}
 async def update_vtb_list():
-    vtb_list = load_vtb_list()
+    vtb_list = []
     urls = [
         "https://api.vtbs.moe/v1/short",
         "https://api.tokyo.vtbs.moe/v1/short",
@@ -37,13 +33,13 @@ async def update_vtb_list():
     async with httpx.AsyncClient(proxies=proxies) as client:
         for url in urls:
             try:
-                resp = await client.get(url, timeout=10)
+                resp = await client.get(url, timeout=20)
                 result = resp.json()
                 if not result:
                     continue
-                vtb_list += result
-                uid_list = list(set((info["mid"] for info in vtb_list)))
-                vtb_list = list(filter(lambda info: info["mid"] in uid_list, vtb_list))
+                for info in result:
+                    if info.get("mid", None) and info.get("uname", None):
+                        vtb_list.append(info)
                 break
             except httpx.TimeoutException:
                 logger.warning(f"Get {url} timeout")
@@ -167,13 +163,10 @@ async def get_reply(name: str) -> Union[str, bytes]:
     medal_dict = {medal["target_name"]: medal for medal in medals}
 
     vtb_dict = {info["mid"]: info for info in vtb_list}
-    
     vtbs = [
         info for uid, info in vtb_dict.items() if uid in user_info.get("attentions", [])
     ]
     vtbs = [format_vtb_info(info, medal_dict) for info in vtbs]
-
-    
 
     follows_num = int(user_info["attention"])
     vtbs_num = len(vtbs)
@@ -188,13 +181,5 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "vtbs": vtbs,
     }
     template = env.get_template("info.html")
-    hti = Html2Image()
     content = await template.render_async(info=result)
-
-    lie = (len(vtbs)//100) + (0 if len(vtbs)%100 == 0 else 1)
-    hti.size = (lie*570,(280+len(vtbs)*63) if len (vtbs)<101 else 6650)
-    hti.screenshot(html_str=content, save_as='ccf.jpg')
-    return image('ccf.jpg', "../../")
-
-
-
+    return await html_to_pic(content, wait=0, viewport={"width": 100, "height": 100})

@@ -30,7 +30,6 @@ async def _(msg: Message = CommandArg()):
         await ddcheck.finish()
 
     try:
-        print(text)
         res = await get_reply(text)
     except:
         logger.warning(traceback.format_exc())
@@ -39,4 +38,4 @@ async def _(msg: Message = CommandArg()):
     if isinstance(res, str):
         await ddcheck.finish(res)
     else:
-        await ddcheck.finish(res)
+        await ddcheck.finish(MessageSegment.image(res))
