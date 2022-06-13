@@ -18,7 +18,7 @@ VTB列表数据来源：[vtbs.moe](https://vtbs.moe/)
 该分支的图片大小会更友善（更少的白边）
 
 那个分支需要计算宽高
-另外一个解决办法[html2image]([https://vtbs.moe/](https://github.com/po-lan/zhenxun-nonebot-plugin-ddcheck/tree/html2image))
+另外一个解决办法[html2image](https://github.com/po-lan/zhenxun-nonebot-plugin-ddcheck/tree/html2image)
 
 
 ### 使用方式
