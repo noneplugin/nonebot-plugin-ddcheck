@@ -65,7 +65,6 @@ async def html_to_pic(html="",wait: int = 10,**kwargs):
 loop = asyncio.get_event_loop()
 loop.run_until_complete(html_to_pic())
 
-"""
 
 import jinja2
 import asyncio
@@ -75,3 +74,5 @@ async def a():
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete( a())
+
+"""
