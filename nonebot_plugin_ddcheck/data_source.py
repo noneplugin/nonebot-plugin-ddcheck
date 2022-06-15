@@ -6,7 +6,7 @@ from typing import List, Union
 from nonebot import get_driver
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
-from .HTP2 import html_to_pic
+from nonebot_plugin_htmlrender import html_to_pic
 
 
 from .config import Config
@@ -22,7 +22,7 @@ env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_path), enable_async=True
 )
 
-proxies = { "http://": None, "https://": None}
+
 async def update_vtb_list():
     vtb_list = []
     urls = [
@@ -30,7 +30,7 @@ async def update_vtb_list():
         "https://api.tokyo.vtbs.moe/v1/short",
         "https://vtbs.musedash.moe/v1/short",
     ]
-    async with httpx.AsyncClient(proxies=proxies) as client:
+    async with httpx.AsyncClient() as client:
         for url in urls:
             try:
                 resp = await client.get(url, timeout=20)
@@ -87,7 +87,7 @@ async def get_uid_by_name(name: str) -> int:
     try:
         url = "http://api.bilibili.com/x/web-interface/search/type"
         params = {"search_type": "bili_user", "keyword": name}
-        async with httpx.AsyncClient(proxies=proxies) as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(url, params=params, timeout=10)
             result = resp.json()
         for user in result["data"]["result"]:
@@ -103,7 +103,7 @@ async def get_user_info(uid: int) -> dict:
     try:
         url = "https://account.bilibili.com/api/member/getCardByMid"
         params = {"mid": uid}
-        async with httpx.AsyncClient(proxies=proxies) as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(url, params=params, timeout=10)
             result = resp.json()
         return result["card"]
@@ -117,7 +117,7 @@ async def get_medals(uid: int) -> List[dict]:
         url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
         params = {"target_id": uid}
         headers = {"cookie": dd_config.bilibili_cookie}
-        async with httpx.AsyncClient(proxies=proxies) as client:
+        async with httpx.AsyncClient() as client:
             resp = await client.get(url, params=params, headers=headers)
             result = resp.json()
         return result["data"]["list"]
@@ -179,7 +179,6 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "follows": user_info["attention"],
         "percent": f"{percent:.2f}% ({vtbs_num}/{follows_num})",
         "vtbs": vtbs,
-        "p": math.ceil(vtbs_num/math.ceil(vtbs_num/100))
     }
     template = env.get_template("info.html")
     content = await template.render_async(info=result)

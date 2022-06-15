@@ -160,9 +160,9 @@
         </div>
       </div>
       <div class="list">
-        {% for i in range(0, (info['vtbs'] | length), info['p']) %}
+        {% for i in range(0, (info['vtbs'] | length), 100) %}
         <table>
-          {% for vtb in info['vtbs'][i: i + info['p']] %}
+          {% for vtb in info['vtbs'][i: i + 100] %}
           <tr>
             <td>
               <div class="up-name">{{ vtb['name'] }}</div>

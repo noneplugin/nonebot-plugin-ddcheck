@@ -8,19 +8,19 @@ from nonebot.log import logger
 from .data_source import get_reply
 
 
-__zx_plugin_name__ = "成分姬"
-__plugin_des__ = "查询关注列表中的Vtb"
-__plugin_version__ = 0.1
-__plugin_cmd__ = ["查成分 {用户名/UID}"]
-__plugin_usage__ = f"{__plugin_des__}\nUsage:\n{__plugin_cmd__}"
-__plugin_type__ = ("一些工具",)
+__help__plugin_name__ = "ddcheck"
+__des__ = "成分姬"
+__cmd__ = """
+查成分 {用户名/UID}
+""".strip()
+__short_cmd__ = __cmd__
+__example__ = """
+查成分 小南莓Official
+""".strip()
+__usage__ = f"{__des__}\nUsage:\n{__cmd__}\nExample:\n{__example__}"
 
-__plugin_settings__ = {
-    "level": 5,
-    "cmd": ["查成分 {用户名/UID}"],
-}
 
-ddcheck = on_command("查成分", block=True, priority=5)
+ddcheck = on_command("查成分", block=True, priority=12)
 
 
 @ddcheck.handle()

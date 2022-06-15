@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "nonebot_plugin_ddcheck"
+version = "0.1.4"
+description = "Nonebot2 成分姬插件"
+authors = ["meetwq <meetwq@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/MeetWq/nonebot-plugin-ddcheck"
+repository = "https://github.com/MeetWq/nonebot-plugin-ddcheck"
+
+[tool.poetry.dependencies]
+python = "^3.7.3"
+nonebot2 = "^2.0.0-beta.1"
+nonebot-adapter-onebot = "^2.0.0-beta.1"
+nonebot-plugin-htmlrender = ">=0.0.4"
+nonebot-plugin-apscheduler = "^0.1.2"
+httpx = ">=0.19.0"
+Jinja2 = "^3.0.0"
+
+[tool.poetry.dev-dependencies]
+nb-cli = "^0.6.0"
+black = "^22.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
