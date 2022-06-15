@@ -179,6 +179,7 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "follows": user_info["attention"],
         "percent": f"{percent:.2f}% ({vtbs_num}/{follows_num})",
         "vtbs": vtbs,
+        "p": math.ceil(vtbs_num/math.ceil(vtbs_num/100))
     }
     template = env.get_template("info.html")
     content = await template.render_async(info=result)
