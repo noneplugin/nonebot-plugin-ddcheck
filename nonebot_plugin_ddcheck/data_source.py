@@ -172,7 +172,7 @@ async def get_reply(name: str) -> Union[str, bytes]:
     follows_num = int(user_info["attention"])
     vtbs_num = len(vtbs)
     percent = vtbs_num / follows_num * 100 if follows_num else 0
-    num_per_col = math.ceil(vtbs_num / math.ceil(vtbs_num / 100)) if vtbs_num else 0
+    num_per_col = math.ceil(vtbs_num / math.ceil(vtbs_num / 100)) if vtbs_num else 1
     result = {
         "name": user_info["name"],
         "uid": user_info["mid"],
