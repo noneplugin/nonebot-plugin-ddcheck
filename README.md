@@ -30,7 +30,10 @@ nb plugin install nonebot_plugin_ddcheck
 pip install nonebot_plugin_ddcheck
 ```
 
-若要显示主播牌子，需要在 `.env.xxx` 文件中添加任意的B站用户cookie：
+
+### 配置
+
+需要在 `.env.xxx` 文件中添加任意的B站用户cookie：
 
 ```
 bilibili_cookie=xxx

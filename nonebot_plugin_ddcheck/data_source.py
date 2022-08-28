@@ -88,8 +88,10 @@ async def get_uid_by_name(name: str) -> int:
     try:
         url = "http://api.bilibili.com/x/web-interface/search/type"
         params = {"search_type": "bili_user", "keyword": name}
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, params=params, timeout=10)
+        headers = {"cookie": dd_config.bilibili_cookie}
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.get("https://www.bilibili.com", headers=headers)
+            resp = await client.get(url, params=params)
             result = resp.json()
             for user in result["data"]["result"]:
                 if user["uname"] == name:
@@ -104,11 +106,10 @@ async def get_user_info(uid: int) -> dict:
     try:
         url = "https://account.bilibili.com/api/member/getCardByMid"
         params = {"mid": uid}
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, params=params, timeout=10)
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url, params=params)
             result = resp.json()
             return result["card"]
-        return {}
     except (KeyError, IndexError, httpx.TimeoutException) as e:
         logger.warning(f"Error in get_user_info({uid}): {e}")
         return {}
@@ -119,11 +120,10 @@ async def get_medals(uid: int) -> List[dict]:
         url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
         params = {"target_id": uid}
         headers = {"cookie": dd_config.bilibili_cookie}
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(url, params=params, headers=headers)
             result = resp.json()
             return result["data"]["list"]
-        return []
     except (KeyError, IndexError, httpx.TimeoutException) as e:
         logger.warning(f"Error in get_medals({uid}): {e}")
         return []
