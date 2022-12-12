@@ -49,6 +49,8 @@ async def update_vtb_list():
                 break
             except httpx.TimeoutException:
                 logger.warning(f"Get {url} timeout")
+            except Exception:
+                logger.exception(f"Error when getting {url}, ignore")
     dump_vtb_list(vtb_list)
 
 
