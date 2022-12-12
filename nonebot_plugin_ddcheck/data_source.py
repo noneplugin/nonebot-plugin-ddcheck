@@ -27,7 +27,6 @@ env = jinja2.Environment(
 async def update_vtb_list():
     vtb_list = []
     urls = [
-        "http://bh.ayud.top/bili/bilicfsql.php",
         "https://api.vtbs.moe/v1/short",
         "https://api.tokyo.vtbs.moe/v1/short",
         "https://vtbs.musedash.moe/v1/short",
