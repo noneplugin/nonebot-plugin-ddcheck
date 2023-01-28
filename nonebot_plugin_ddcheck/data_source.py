@@ -8,13 +8,14 @@ from nonebot import get_driver
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import html_to_pic
+from nonebot_plugin_localstore import get_cache_dir
 
 
 from .config import Config
 
 dd_config = Config.parse_obj(get_driver().config.dict())
 
-data_path = Path("data/ddcheck")
+data_path = get_cache_dir("nonebot_plugin_ddcheck")
 vtb_list_path = data_path / "vtb_list.json"
 
 dir_path = Path(__file__).parent
