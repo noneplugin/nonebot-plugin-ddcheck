@@ -4,7 +4,7 @@ NoneBot2 成分姬插件
 
 查询B站关注列表的VTuber成分，并以图片形式发出
 
-VTB列表数据来源：[宇のAPI](http://bh.ayud.top/bili/bilicfsql.php) 、 [vtbs.moe](https://vtbs.moe/)
+VTB列表数据来源：[vtbs.moe](https://vtbs.moe/)
 
 
 ### 使用方式
