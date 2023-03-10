@@ -1,19 +1,17 @@
 import traceback
 from typing import Union
 
-from nonebot.log import logger
-from nonebot.matcher import Matcher
-from nonebot.params import CommandArg
 from nonebot import on_command, require
-from nonebot.plugin import PluginMetadata
-
 from nonebot.adapters.onebot.v11 import Bot as V11Bot
 from nonebot.adapters.onebot.v11 import Message as V11Msg
 from nonebot.adapters.onebot.v11 import MessageSegment as V11MsgSeg
-
 from nonebot.adapters.onebot.v12 import Bot as V12Bot
 from nonebot.adapters.onebot.v12 import Message as V12Msg
 from nonebot.adapters.onebot.v12 import MessageSegment as V12MsgSeg
+from nonebot.log import logger
+from nonebot.matcher import Matcher
+from nonebot.params import CommandArg
+from nonebot.plugin import PluginMetadata
 
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
@@ -31,7 +29,7 @@ __plugin_meta__ = PluginMetadata(
         "unique_name": "ddcheck",
         "example": "查成分 小南莓Official",
         "author": "meetwq <meetwq@gmail.com>",
-        "version": "0.2.0",
+        "version": "0.2.1",
     },
 )
 
