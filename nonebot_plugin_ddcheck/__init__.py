@@ -29,7 +29,7 @@ __plugin_meta__ = PluginMetadata(
         "unique_name": "ddcheck",
         "example": "查成分 小南莓Official",
         "author": "meetwq <meetwq@gmail.com>",
-        "version": "0.2.1",
+        "version": "0.2.2",
     },
 )
 
