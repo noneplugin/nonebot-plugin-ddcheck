@@ -5,15 +5,14 @@ from nonebot.adapters import Message
 from nonebot.log import logger
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
-from nonebot.plugin import PluginMetadata
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
+require("nonebot_plugin_alconna")
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
 require("nonebot_plugin_localstore")
-require("nonebot_plugin_saa")
 
-from nonebot_plugin_saa import Image, MessageFactory
-from nonebot_plugin_saa import __plugin_meta__ as saa_plugin_meta
+from nonebot_plugin_alconna import UniMessage
 
 from .config import Config
 from .data_source import get_reply
@@ -25,12 +24,9 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     homepage="https://github.com/noneplugin/nonebot-plugin-ddcheck",
     config=Config,
-    supported_adapters=saa_plugin_meta.supported_adapters,
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
     extra={
-        "unique_name": "ddcheck",
         "example": "查成分 小南莓Official",
-        "author": "meetwq <meetwq@gmail.com>",
-        "version": "0.3.1",
     },
 )
 
@@ -50,12 +46,11 @@ async def _(
 
     try:
         result = await get_reply(text)
-    except:
+    except Exception:
         logger.warning(traceback.format_exc())
         await matcher.finish("出错了，请稍后再试")
 
     if isinstance(result, str):
         await matcher.finish(result)
 
-    await MessageFactory(Image(result)).send()
-    await matcher.finish()
+    await UniMessage.image(raw=result).send()

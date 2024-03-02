@@ -1,23 +1,20 @@
 import json
 import math
+import traceback
+from http.cookies import SimpleCookie
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
+import bilireq
 import httpx
 import jinja2
-from nonebot import get_driver
+from bilireq.utils import get_homepage_cookies
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import html_to_pic
 from nonebot_plugin_localstore import get_cache_dir
 
-from .config import Config
-
-dd_config = Config.parse_obj(get_driver().config.dict())
-headers = {
-    "cookie": dd_config.bilibili_cookie,
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.35",
-}
+from .config import ddcheck_config
 
 data_path = get_cache_dir("nonebot_plugin_ddcheck")
 vtb_list_path = data_path / "vtb_list.json"
@@ -28,13 +25,19 @@ env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(template_path), enable_async=True
 )
 
+raw_cookie = ddcheck_config.bilibili_cookie
+cookie = SimpleCookie()
+cookie.load(raw_cookie)
+cookies = {key: value.value for key, value in cookie.items()}
+
 
 async def update_vtb_list():
     vtb_list = []
     urls = [
         "https://api.vtbs.moe/v1/short",
-        "https://api.tokyo.vtbs.moe/v1/short",
-        "https://vtbs.musedash.moe/v1/short",
+        "https://cfapi.vtbs.moe/v1/short",
+        "https://hkapi.vtbs.moe/v1/short",
+        "https://kr.vtbs.moe/v1/short",
     ]
     async with httpx.AsyncClient() as client:
         for url in urls:
@@ -95,47 +98,30 @@ async def get_vtb_list() -> List[dict]:
     return load_vtb_list()
 
 
-async def get_uid_by_name(name: str) -> int:
-    try:
-        url = "http://api.bilibili.com/x/web-interface/search/type"
-        params = {"search_type": "bili_user", "keyword": name}
-        async with httpx.AsyncClient(timeout=10) as client:
-            await client.get("https://www.bilibili.com", headers=headers)
-            resp = await client.get(url, params=params)
-            result = resp.json()
-            for user in result["data"]["result"]:
-                if user["uname"] == name:
-                    return user["mid"]
-        return 0
-    except (KeyError, IndexError, httpx.TimeoutException) as e:
-        logger.warning(f"Error in get_uid_by_name({name}): {e}")
-        return 0
-
-
-async def get_user_info(uid: int) -> dict:
-    try:
-        url = "https://account.bilibili.com/api/member/getCardByMid"
-        params = {"mid": uid}
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(url, params=params)
-            result = resp.json()
-            return result["card"]
-    except (KeyError, IndexError, httpx.TimeoutException) as e:
-        logger.warning(f"Error in get_user_info({uid}): {e}")
-        return {}
+async def get_uid_by_name(name: str) -> Optional[int]:
+    url = "https://api.bilibili.com/x/web-interface/wbi/search/type"
+    params = {"search_type": "bili_user", "keyword": name}
+    resp = await bilireq.utils.get(url, params=params, cookies=cookies)
+    for user in resp["result"]:
+        if user["uname"] == name:
+            return user["mid"]
 
 
 async def get_medals(uid: int) -> List[dict]:
-    try:
-        url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
-        params = {"target_id": uid}
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(url, params=params, headers=headers)
-            result = resp.json()
-            return result["data"]["list"]
-    except (KeyError, IndexError, httpx.TimeoutException) as e:
-        logger.warning(f"Error in get_medals({uid}): {e}")
-        return []
+    url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
+    params = {"target_id": uid}
+    resp = await bilireq.utils.get(url, params=params, cookies=cookies)
+    return resp["list"]
+
+
+async def get_user_info(uid: int) -> dict:
+    cookies.update(await get_homepage_cookies())
+    url = "https://account.bilibili.com/api/member/getCardByMid"
+    params = {"mid": uid}
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(url, params=params, cookies=cookies)
+        result = resp.json()
+        return result["card"]
 
 
 def format_color(color: int) -> str:
@@ -162,10 +148,18 @@ async def get_reply(name: str) -> Union[str, bytes]:
     if name.isdigit():
         uid = int(name)
     else:
-        uid = await get_uid_by_name(name)
-    user_info = await get_user_info(uid)
-    if not user_info:
-        return "获取用户信息失败，请检查名称或使用uid查询"
+        try:
+            uid = await get_uid_by_name(name)
+            assert uid
+        except Exception:
+            logger.warning(traceback.format_exc())
+            return "获取用户信息失败，请检查名称或使用uid查询"
+
+    try:
+        user_info = await get_user_info(uid)
+    except Exception:
+        logger.warning(traceback.format_exc())
+        return "获取用户信息失败，请检查名称或稍后再试"
 
     attentions = user_info.get("attentions", [])
     follows_num = int(user_info["attention"])
@@ -176,7 +170,11 @@ async def get_reply(name: str) -> Union[str, bytes]:
     if not vtb_list:
         return "获取vtb列表失败，请稍后再试"
 
-    medals = await get_medals(uid)
+    try:
+        medals = await get_medals(uid)
+    except Exception:
+        logger.warning(traceback.format_exc())
+        medals = []
     medal_dict = {medal["target_name"]: medal for medal in medals}
 
     vtb_dict = {info["mid"]: info for info in vtb_list}
