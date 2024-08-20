@@ -8,7 +8,7 @@ from typing import List, Optional, Union
 import bilireq
 import httpx
 import jinja2
-from bilireq.utils import get_homepage_cookies
+from bilireq.utils import DEFAULT_HEADERS, get_homepage_cookies
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import html_to_pic
@@ -119,7 +119,9 @@ async def get_user_info(uid: int) -> dict:
     url = "https://account.bilibili.com/api/member/getCardByMid"
     params = {"mid": uid}
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(url, params=params, cookies=cookies)
+        resp = await client.get(
+            url, params=params, headers=DEFAULT_HEADERS, cookies=cookies
+        )
         result = resp.json()
         return result["card"]
 
