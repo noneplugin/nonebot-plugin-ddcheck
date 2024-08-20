@@ -1,9 +1,8 @@
 import json
 import math
-import traceback
 from http.cookies import SimpleCookie
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, Optional
 
 import bilireq
 import httpx
@@ -69,7 +68,7 @@ scheduler.add_job(
 )
 
 
-def load_vtb_list() -> List[dict]:
+def load_vtb_list() -> list[dict]:
     if vtb_list_path.exists():
         with vtb_list_path.open("r", encoding="utf-8") as f:
             try:
@@ -80,7 +79,7 @@ def load_vtb_list() -> List[dict]:
     return []
 
 
-def dump_vtb_list(vtb_list: List[dict]):
+def dump_vtb_list(vtb_list: list[dict]):
     data_path.mkdir(parents=True, exist_ok=True)
     json.dump(
         vtb_list,
@@ -91,7 +90,7 @@ def dump_vtb_list(vtb_list: List[dict]):
     )
 
 
-async def get_vtb_list() -> List[dict]:
+async def get_vtb_list() -> list[dict]:
     vtb_list = load_vtb_list()
     if not vtb_list:
         await update_vtb_list()
@@ -107,7 +106,7 @@ async def get_uid_by_name(name: str) -> Optional[int]:
             return user["mid"]
 
 
-async def get_medals(uid: int) -> List[dict]:
+async def get_medal_list(uid: int) -> list[dict]:
     url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
     params = {"target_id": uid}
     resp = await bilireq.utils.get(url, params=params, cookies=cookies)
@@ -146,40 +145,14 @@ def format_vtb_info(info: dict, medal_dict: dict) -> dict:
     return {"name": name, "uid": uid, "medal": medal}
 
 
-async def get_reply(name: str) -> Union[str, bytes]:
-    if name.isdigit():
-        uid = int(name)
-    else:
-        try:
-            uid = await get_uid_by_name(name)
-            assert uid
-        except Exception:
-            logger.warning(traceback.format_exc())
-            return "获取用户信息失败，请检查名称或使用uid查询"
-
-    try:
-        user_info = await get_user_info(uid)
-    except Exception:
-        logger.warning(traceback.format_exc())
-        return "获取用户信息失败，请检查名称或稍后再试"
-
+async def render_ddcheck_image(
+    user_info: dict[str, Any], vtb_list: list[dict], medal_list: list[dict]
+) -> bytes:
     attentions = user_info.get("attentions", [])
     follows_num = int(user_info["attention"])
-    if not attentions and follows_num:
-        return "获取用户关注列表失败，关注列表可能未公开"
-
-    vtb_list = await get_vtb_list()
-    if not vtb_list:
-        return "获取vtb列表失败，请稍后再试"
-
-    try:
-        medals = await get_medals(uid)
-    except Exception:
-        logger.warning(traceback.format_exc())
-        medals = []
-    medal_dict = {medal["target_name"]: medal for medal in medals}
 
     vtb_dict = {info["mid"]: info for info in vtb_list}
+    medal_dict = {medal["target_name"]: medal for medal in medal_list}
     vtbs = [info for uid, info in vtb_dict.items() if uid in attentions]
     vtbs = [format_vtb_info(info, medal_dict) for info in vtbs]
 
