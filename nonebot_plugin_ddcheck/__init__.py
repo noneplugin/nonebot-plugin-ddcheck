@@ -1,6 +1,5 @@
 import traceback
 
-from bilireq.exceptions import ResponseCodeError
 from nonebot import require
 from nonebot.log import logger
 from nonebot.matcher import Matcher
@@ -55,7 +54,7 @@ async def _(matcher: Matcher, name: str):
     else:
         try:
             uid = await get_uid_by_name(name)
-        except ResponseCodeError:
+        except Exception:
             logger.warning(traceback.format_exc())
             await matcher.finish("获取用户信息失败，请检查名称或使用uid查询")
 
@@ -79,7 +78,7 @@ async def _(matcher: Matcher, name: str):
 
     try:
         medal_list = await get_medal_list(uid)
-    except ResponseCodeError:
+    except Exception:
         logger.warning(traceback.format_exc())
         medal_list = []
 

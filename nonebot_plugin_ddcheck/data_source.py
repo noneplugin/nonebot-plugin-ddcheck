@@ -4,16 +4,24 @@ from http.cookies import SimpleCookie
 from pathlib import Path
 from typing import Any, Optional
 
-import bilireq
 import httpx
 import jinja2
-from bilireq.utils import DEFAULT_HEADERS, get_homepage_cookies
 from nonebot.log import logger
 from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import html_to_pic
 from nonebot_plugin_localstore import get_cache_dir
 
 from .config import ddcheck_config
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 "
+        "Safari/537.36 Edg/114.0.1823.67"
+    ),
+    "Referer": "https://www.bilibili.com/",
+}
+
 
 data_path = get_cache_dir("nonebot_plugin_ddcheck")
 vtb_list_path = data_path / "vtb_list.json"
@@ -28,6 +36,8 @@ raw_cookie = ddcheck_config.bilibili_cookie
 cookie = SimpleCookie()
 cookie.load(raw_cookie)
 cookies = {key: value.value for key, value in cookie.items()}
+
+homepage_cookies: dict[str, str] = {}
 
 
 async def update_vtb_list():
@@ -97,30 +107,47 @@ async def get_vtb_list() -> list[dict]:
     return load_vtb_list()
 
 
+async def get_homepage_cookies(client: httpx.AsyncClient) -> dict[str, str]:
+    if not homepage_cookies:
+        headers = {"User-Agent": HEADERS["User-Agent"]}
+        resp = await client.get(
+            "https://data.bilibili.com/v/", headers=headers, follow_redirects=True
+        )
+        homepage_cookies.update(resp.cookies)
+    return homepage_cookies
+
+
 async def get_uid_by_name(name: str) -> Optional[int]:
     url = "https://api.bilibili.com/x/web-interface/wbi/search/type"
     params = {"search_type": "bili_user", "keyword": name}
-    resp = await bilireq.utils.get(url, params=params, cookies=cookies)
-    for user in resp["result"]:
-        if user["uname"] == name:
-            return user["mid"]
+    async with httpx.AsyncClient(timeout=10) as client:
+        cookies.update(await get_homepage_cookies(client))
+        resp = await client.get(url, params=params, headers=HEADERS, cookies=cookies)
+        cookies.update(resp.cookies)
+        result = resp.json()
+        for user in result["data"]["result"]:
+            if user["uname"] == name:
+                return user["mid"]
 
 
 async def get_medal_list(uid: int) -> list[dict]:
     url = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
     params = {"target_id": uid}
-    resp = await bilireq.utils.get(url, params=params, cookies=cookies)
-    return resp["list"]
+    async with httpx.AsyncClient(timeout=10) as client:
+        cookies.update(await get_homepage_cookies(client))
+        resp = await client.get(url, params=params, headers=HEADERS, cookies=cookies)
+        cookies.update(resp.cookies)
+        result = resp.json()
+        return result["data"]["list"]
 
 
 async def get_user_info(uid: int) -> dict:
-    cookies.update(await get_homepage_cookies())
     url = "https://account.bilibili.com/api/member/getCardByMid"
     params = {"mid": uid}
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(
-            url, params=params, headers=DEFAULT_HEADERS, cookies=cookies
-        )
+        cookies.update(await get_homepage_cookies(client))
+        resp = await client.get(url, params=params, headers=HEADERS, cookies=cookies)
+        cookies.update(resp.cookies)
         result = resp.json()
         return result["card"]
 

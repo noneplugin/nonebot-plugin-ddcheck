@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot_plugin_ddcheck"
-version = "0.4.2"
+version = "0.4.3"
 description = "Nonebot2 成分姬插件"
 authors = ["meetwq <meetwq@gmail.com>"]
 license = "MIT"
@@ -15,7 +15,6 @@ nonebot-plugin-alconna = ">=0.46.3,<1.0.0"
 nonebot-plugin-htmlrender = "^0.4.0"
 nonebot-plugin-apscheduler = ">=0.4.0,<1.0.0"
 nonebot-plugin-localstore = ">=0.6.0,<1.0.0"
-bilireq = "^0.2.12"
 httpx = ">=0.20.0,<1.0.0"
 Jinja2 = "^3.0.0"
 
